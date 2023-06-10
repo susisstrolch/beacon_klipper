@@ -266,7 +266,7 @@ class BeaconProbe:
             kin_spos = {s.get_name(): s.get_commanded_position()
                         for s in kin.get_steppers()}
             kin_pos = kin.calc_position(kin_spos)
-            self._calibrate(gcmd, kin_pos)
+            self._calibrate(gcmd, kin_pos, False)
         else:
             curtime = self.printer.get_reactor().monotonic()
             kin_status = self.toolhead.get_status(curtime)
@@ -278,7 +278,7 @@ class BeaconProbe:
             if 'z' not in kin_status['homed_axes']:
                 self.toolhead.get_last_move_time()
                 pos = self.toolhead.get_position()
-                pos[2] = kin_status['axis_maximum'][2]
+                pos[2] = kin_status['axis_maximum'][2] - 1.0
                 self.toolhead.set_position(pos, homing_axes=[2])
                 forced_z = True
 
@@ -1150,13 +1150,13 @@ class BeaconEndstopWrapper:
     def _handle_home_rails_begin(self):
         self.is_homing = False
 
+    def _handle_home_rails_begin(self, homing_state, rails):
+        self.is_homing = False
+
     def _handle_home_rails_end(self, homing_state, rails):
         if self.beacon.model is None:
             return
 
-        if not self.is_homing:
-            return
-        
         if 2 not in homing_state.get_axes():
             return
 
