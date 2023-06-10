@@ -1146,15 +1146,15 @@ class BeaconEndstopWrapper:
         for stepper in kin.get_steppers():
             if stepper.is_active_axis('z'):
                 self.add_stepper(stepper)
-    
-    def _handle_home_rails_begin(self):
-        self.is_homing = False
 
     def _handle_home_rails_begin(self, homing_state, rails):
         self.is_homing = False
 
     def _handle_home_rails_end(self, homing_state, rails):
         if self.beacon.model is None:
+            return
+        
+        if not self.is_homing:
             return
 
         if 2 not in homing_state.get_axes():
